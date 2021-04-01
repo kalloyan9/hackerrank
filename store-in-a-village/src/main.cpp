@@ -2,19 +2,19 @@
 #include <queue>
 #include <vector>
 #include <unordered_map>
-#include <string>
 using namespace std;
 
-
+// types
 #define EMPTY 0
 #define HOUSE -1
+using typecoords = pair<int, int>;
 
 // GLOBALS
 int n, m, k, d;
 int **matrix = nullptr;
-pair<int,int> dummy(-1, -1); // used for counting the range in step varriable
-vector<pair<int, int>> houses;
-vector<pair<int, int>> answers;
+const typecoords dummy(-1, -1); // used for counting the range in step varriable
+vector<typecoords> houses;
+vector<typecoords> answers;
 
 
 void print()
@@ -22,7 +22,7 @@ void print()
     for (int i = 0; i < n; ++i) {
         for (int j = 0; j < m; ++j) 
             cout << matrix[j][i] << '\t';
-        cout << endl;
+        cout << endl << endl << endl << endl;
     }
     cout << "\n==============================================\n";
 }
@@ -38,69 +38,90 @@ struct hash_pair {
     }
 };
 
-void bfs(pair<int, int> p)
+void bfs(typecoords house, unordered_map<typecoords, bool, hash_pair>& used)
 {
-        unordered_map<pair<int,int>, bool, hash_pair> used;
-        queue<pair<int, int>> q;
-        
-        if (p.first - 1 >= 0 && matrix[p.first - 1][p.second] != HOUSE) // left
-                q.push(make_pair(p.first - 1, p.second));
-        if (p.first + 1 < n && matrix[p.first + 1][p.second] != HOUSE) // right
-                q.push(make_pair(p.first + 1, p.second));
-        if (p.second - 1 >= 0 && matrix[p.first][p.second - 1] != HOUSE) // down
-                q.push(make_pair(p.first, p.second - 1));
-        if (p.second + 1 < m && matrix[p.first][p.second + 1] != HOUSE) // up
-                q.push(make_pair(p.first, p.second + 1));
-        q.push(dummy);
-        int step = 1;
-        
-        while (!q.empty()) {
-                pair<int, int> candidate = q.front();
-                pair<int, int> curr;
-                q.pop();
-                if (candidate == dummy) {
-                    ++step;
-                    if (step > d)
-                        break;
-                    continue;
-                }
-                else
-                    curr = candidate;
-                
-                auto it = used.find(curr);
-                if (it == used.end()) { // valid and unused coordinates
-                        ++matrix[curr.first][curr.second];
-                        if (matrix[curr.first][curr.second] >= k)
-                                answers.push_back(curr);
-                        used[curr] = true;
+    queue<typecoords> q;
+    int step = 0;
+    // left
+    if (house.first - 1 >= 0 && matrix[house.first - 1][house.second] != HOUSE) {
+        used[make_pair(house.first - 1, house.second)] = true;
+        q.push(make_pair(house.first - 1, house.second));
+    }
+    // right
+    if (house.first + 1 < n && matrix[house.first + 1][house.second] != HOUSE) {
+        used[make_pair(house.first + 1, house.second)] = true;
+        q.push(make_pair(house.first + 1, house.second));
+    }
+    // up
+    if (house.second - 1 >= 0 && matrix[house.first][house.second - 1] != HOUSE) {
+        used[make_pair(house.first, house.second - 1)] = true;
+        q.push(make_pair(house.first, house.second - 1));
+    }
+    // down
+    if (house.second + 1 < m && matrix[house.first][house.second + 1] != HOUSE) {
+        used[make_pair(house.first, house.second + 1)] = true;
+        q.push(make_pair(house.first, house.second + 1));
+    }
+    // dummy
+    q.push(dummy);
 
-                        // left
-                        it = used.find(make_pair(curr.first - 1, curr.second));
-                        if (curr.first - 1 >= 0 && it == used.end() && matrix[curr.first - 1][curr.second] != HOUSE)
-                                q.push(make_pair(curr.first - 1, curr.second));
-                        // right
-                        it = used.find(make_pair(curr.first + 1, curr.second));
-                        if (curr.first + 1 < n && it == used.end() && matrix[curr.first + 1][curr.second] != HOUSE)
-                                q.push(make_pair(curr.first + 1, curr.second));
-                        // down
-                        it = used.find(make_pair(curr.first, curr.second - 1));
-                        if (curr.second - 1 >= 0 && it == used.end() && matrix[curr.first][curr.second - 1] != HOUSE)
-                                q.push(make_pair(curr.first, curr.second - 1));
-                        // right
-                        it = used.find(make_pair(curr.first, curr.second + 1));
-                        if (curr.second + 1 < m && it == used.end() && matrix[curr.first][curr.second + 1] != HOUSE)
-                                q.push(make_pair(curr.first, curr.second + 1));
-
-                        q.push(dummy);
-                }
+    while (!q.empty()) {
+        typecoords curr = q.front();
+        q.pop();
+        if (curr == dummy) {
+            step++;
+            if (step >= d)
+                break;
+            else
+                continue;
         }
+
+        // increase
+        matrix[curr.first][curr.second]++;
+        typecoords next = curr;
+        
+        // childs
+        // left
+        next.first = curr.first - 1;
+        auto it = used.find(next);
+        if (next.first >= 0 && it == used.end() && matrix[next.first][next.second] != HOUSE) {
+            q.push(next);
+            used[next] = true;
+        }
+        // right
+        next.first = curr.first + 1;
+        it = used.find(next);
+        if (next.first < n && it == used.end() && matrix[next.first][next.second] != HOUSE) {
+            q.push(next);
+            used[next] = true;
+        }
+        // up
+        next.first = curr.first;
+        next.second = curr.second - 1;
+        it = used.find(next);
+        if (next.second >= 0 && it == used.end() && matrix[next.first][next.second] != HOUSE) {
+            q.push(next);
+            used[next] = true;
+        }
+        // down
+        next.second = curr.second + 1;
+        it = used.find(next);
+        if (next.second < m && it == used.end() && matrix[next.first][next.second] != HOUSE) {
+            q.push(next);
+            used[next] = true;
+        }
+        // dummy
+        q.push(dummy);
+    }
 }
 
 void solve()
 {
+        unordered_map<typecoords, bool, hash_pair> used;
         for (auto it : houses) {
-                bfs(it);
-                print();
+            bfs(it, used);
+            used.clear();
+            print();
         }
 }
 
@@ -141,7 +162,7 @@ int main ()
 }
 
 /*
-4 4
+5 5
 3
 1 0
 1 2

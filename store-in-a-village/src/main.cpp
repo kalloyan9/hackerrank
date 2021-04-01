@@ -20,8 +20,12 @@ vector<typecoords> answers;
 void print()
 {
     for (int i = 0; i < n; ++i) {
-        for (int j = 0; j < m; ++j) 
-            cout << matrix[j][i] << '\t';
+        for (int j = 0; j < m; ++j) {
+            if (matrix[j][i] == HOUSE)
+                cout << 'H' << '\t';
+            else 
+                cout << matrix[j][i] << '\t';
+        }
         cout << endl << endl << endl << endl;
     }
     cout << "\n==============================================\n";
@@ -70,17 +74,21 @@ void bfs(typecoords house, unordered_map<typecoords, bool, hash_pair>& used)
         q.pop();
         if (curr == dummy) {
             step++;
-            if (step >= d)
+            if (step + 1 > d)
                 break;
-            else
+            else {
+                q.push(dummy);
                 continue;
+            }
         }
 
-        // increase
+        // increase number of paths and add answer if needed
         matrix[curr.first][curr.second]++;
-        typecoords next = curr;
-        
+        if (matrix[curr.first][curr.second] >= k)
+            answers.push_back(curr);
+
         // childs
+        typecoords next = curr; // helper
         // left
         next.first = curr.first - 1;
         auto it = used.find(next);
@@ -110,8 +118,6 @@ void bfs(typecoords house, unordered_map<typecoords, bool, hash_pair>& used)
             q.push(next);
             used[next] = true;
         }
-        // dummy
-        q.push(dummy);
     }
 }
 
@@ -121,7 +127,6 @@ void solve()
         for (auto it : houses) {
             bfs(it, used);
             used.clear();
-            print();
         }
 }
 
@@ -147,10 +152,10 @@ int main ()
         cout << "input D: " << endl;
         cin >> d;
         
-        print();
-
         // calculating
+        print();
         solve();
+        print();
 
         // output
         cout << "\n==============================================\n";
@@ -162,10 +167,15 @@ int main ()
 }
 
 /*
+input:
+
 5 5
 3
 1 0
 1 2
 2 3
 2
+
+output:
+1 -> (2, 1);
 */

@@ -12,7 +12,7 @@ using namespace std;
 // GLOBALS
 int n, m, k, d;
 int **matrix = nullptr;
-pair<int,int> dummy(-1, -1); // used for counting range in step varriable
+pair<int,int> dummy(-1, -1); // used for counting the range in step varriable
 vector<pair<int, int>> houses;
 vector<pair<int, int>> answers;
 
@@ -43,47 +43,52 @@ void bfs(pair<int, int> p)
         unordered_map<pair<int,int>, bool, hash_pair> used;
         queue<pair<int, int>> q;
         
-        if (p.first - 1 >= 0) // left
+        if (p.first - 1 >= 0 && matrix[p.first - 1][p.second] != HOUSE) // left
                 q.push(make_pair(p.first - 1, p.second));
-        if (p.first + 1 < n) // right
+        if (p.first + 1 < n && matrix[p.first + 1][p.second] != HOUSE) // right
                 q.push(make_pair(p.first + 1, p.second));
-        if (p.second - 1 >= 0) // down
+        if (p.second - 1 >= 0 && matrix[p.first][p.second - 1] != HOUSE) // down
                 q.push(make_pair(p.first, p.second - 1));
-        if (p.second + 1 < m) // up
+        if (p.second + 1 < m && matrix[p.first][p.second + 1] != HOUSE) // up
                 q.push(make_pair(p.first, p.second + 1));
         q.push(dummy);
         int step = 1;
         
         while (!q.empty()) {
-                pair<int, int> curr = q.front();
+                pair<int, int> candidate = q.front();
+                pair<int, int> curr;
                 q.pop();
-                if (curr == dummy)
-                        ++step;
-                if (step > d)
+                if (candidate == dummy) {
+                    ++step;
+                    if (step > d)
                         break;
-
+                    continue;
+                }
+                else
+                    curr = candidate;
+                
                 auto it = used.find(curr);
-                if (curr != dummy && matrix[curr.first][curr.second] != HOUSE && it == used.end()) { // valid and unused coordinates
+                if (it == used.end()) { // valid and unused coordinates
                         ++matrix[curr.first][curr.second];
-                        if (matrix[curr.first][curr.second] >= d)
+                        if (matrix[curr.first][curr.second] >= k)
                                 answers.push_back(curr);
                         used[curr] = true;
 
                         // left
                         it = used.find(make_pair(curr.first - 1, curr.second));
-                        if (curr.first - 1 >= 0 && it == used.end())
+                        if (curr.first - 1 >= 0 && it == used.end() && matrix[curr.first - 1][curr.second] != HOUSE)
                                 q.push(make_pair(curr.first - 1, curr.second));
                         // right
                         it = used.find(make_pair(curr.first + 1, curr.second));
-                        if (curr.first + 1 < n && it == used.end())
+                        if (curr.first + 1 < n && it == used.end() && matrix[curr.first + 1][curr.second] != HOUSE)
                                 q.push(make_pair(curr.first + 1, curr.second));
                         // down
                         it = used.find(make_pair(curr.first, curr.second - 1));
-                        if (curr.second - 1 >= 0 && it == used.end())
+                        if (curr.second - 1 >= 0 && it == used.end() && matrix[curr.first][curr.second - 1] != HOUSE)
                                 q.push(make_pair(curr.first, curr.second - 1));
                         // right
                         it = used.find(make_pair(curr.first, curr.second + 1));
-                        if (curr.second + 1 < m && it == used.end())
+                        if (curr.second + 1 < m && it == used.end() && matrix[curr.first][curr.second + 1] != HOUSE)
                                 q.push(make_pair(curr.first, curr.second + 1));
 
                         q.push(dummy);

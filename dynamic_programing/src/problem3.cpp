@@ -1,7 +1,7 @@
 #include <iostream>
 #include <limits>
 
-#include "StartAndMeasureThread.hpp"
+#include "StartAndMeasureThread.tpp"
 
 static const long long MOD = 1'000'000'007, FIB0 = 0, FIB1 = 1, N = 20;
 

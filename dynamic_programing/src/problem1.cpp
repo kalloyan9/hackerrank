@@ -7,67 +7,78 @@ struct MyPair {
 };
 
 /*
-idx:0   1   2   3   4   5   6   7   8
-val:5   4   3   6   7   2   8   1   9
-ans: buy on 2 and sell on 4 idx
+idx: 0   1   2   3   4   5   6   7   8
+val: 5   4   3   6   7   2   8   1   9
+ans: buy on idx 7 (val 1) and sell on idx 8 (val 9) -> profit = 8
 */
 MyPair MaxProfit(const std::vector<int>& prices)
 {
-    // Edge case: need at least 2 elements
     if (prices.size() < 2)
     {
         return {0, 0};
     }
 
-    // Initialize tracking variables
-    size_t minIdxToBuy = 0;
-    int minValueToBuy = prices[0];
-    
-    size_t bestIdxToSell = 1;
+    size_t minIdxToBuy = 0;     // Tracks lowest price seen so far
+    size_t bestBuyIdx = 0;      // Tracks buy index for the best profit found
+    size_t bestIdxToSell = 1;   // Tracks sell index for the best profit found
     int bestProfit = prices[1] - prices[0];
     
-    // Iterate through prices starting from index 1
     for (size_t i = 1; i < prices.size(); ++i)
     {
-        // Calculate profit if we sell at current index after buying at minimum
-        int currentProfit = prices[i] - minValueToBuy;
+        int currentProfit = prices[i] - prices[minIdxToBuy];
         
-        // Update best profit and sell index if current profit is better
+        // Only update the winning pair when we find a strictly better profit
         if (currentProfit > bestProfit)
         {
             bestProfit = currentProfit;
+            bestBuyIdx = minIdxToBuy;
             bestIdxToSell = i;
         }
         
-        // Update minimum if current value is smaller
-        if (prices[i] < minValueToBuy)
+        // Update running minimum for future iterations
+        if (prices[i] < prices[minIdxToBuy])
         {
-            minValueToBuy = prices[i];
             minIdxToBuy = i;
         }
     }
 
-    return {minIdxToBuy, bestIdxToSell};
+    // Optional: If prices only ever decrease - do not buy
+    if (bestProfit <= 0)
+    {
+        return {0, 0};
+    }
+
+    return {bestBuyIdx, bestIdxToSell};
 }
-// Time complexity: O(N), Space complexity: O(1)
 
 int problem1_main()
 {
-    // init
     size_t days = 0;
-    std::vector<int> prices;
-    
-    // input
     std::cin >> days;
+
+    std::vector<int> prices;
     prices.reserve(days);
+    
     int value = 0;
-    for (int i = 0; i < days; ++i)
+    for (size_t i = 0; i < days; ++i)
     {
         std::cin >> value;
+        prices.push_back(value); // Fixed: actually add the element to the vector
     }
 
-    // print
     MyPair answer = MaxProfit(prices);
-    std::cout << answer.sellIdx - answer.buyIdx << std::endl;
+    
+    if (prices.size() < 2 || answer.buyIdx == answer.sellIdx)
+    {
+        std::cout << "No profitable trade (Profit: 0)" << std::endl;
+    }
+    else
+    {
+        int profit = prices[answer.sellIdx] - prices[answer.buyIdx];
+        std::cout << "Buy on day " << answer.buyIdx 
+                  << ", sell on day " << answer.sellIdx 
+                  << " | Max Profit: " << profit << std::endl;
+    }
+
     return 0;
 }

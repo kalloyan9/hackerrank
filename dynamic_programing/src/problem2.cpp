@@ -8,8 +8,8 @@ int solve_dp(std::vector<int> &values, size_t k)
     if (n == 0) return 0;
     if (n == 1) return values[0];
 
-    std::vector<int> dp(k, INT_MIN);
-    dp[0] = values[0];
+    std::vector<int> mem(k, INT_MIN);
+    mem[0] = values[0];
 
     for (int i = 1; i < n; ++i)
     {
@@ -18,13 +18,13 @@ int solve_dp(std::vector<int> &values, size_t k)
         {
             if (i - step >= 0)
             {
-                max_prev = std::max(max_prev, dp[(i - step) % k]);
+                max_prev = std::max(max_prev, mem[(i - step) % k]);
             }
         }
-        dp[i % k] = max_prev + values[i];
+        mem[i % k] = max_prev + values[i];
     }
 
-    return dp[(n - 1) % k];
+    return mem[(n - 1) % k];
 }
 
 // standart problem with k = 2 - O(n) computing + O(1) memory

@@ -15,7 +15,6 @@ string rtrim(const string &);
  *  1. STRING s
  *  2. INTEGER k
  */
-#define _TESTING
 
 char ashtonString(string s, int k) {
     set<string> dic{};
@@ -26,38 +25,34 @@ char ashtonString(string s, int k) {
     {
         pS = s.c_str();
         string subStr{*pS};
+        // iterate string by word
         for (pS = s.c_str(); *pS != '\0'; ++pS)
         {
-            // terminate if the next one is the end
-            if (*(pS + 1) == '\0')  continue;
-
             subStr = *pS;
-            size_t len = 1;
-            // otherwise extract substring
-            for (pIt = pS + 1; *pIt != '\0' && len < step; ++pIt, ++len)
+            // check next word
+            if (*(pS + 1) != '\0')
             {
-                subStr.push_back(*pIt);
+                size_t len = 1;
+                // otherwise extract substring
+                for (pIt = pS + 1; *pIt != '\0' && len < step; ++pIt, ++len)
+                {
+                    subStr.push_back(*pIt);
+                }
             }
             dic.insert(subStr);
         }
     }
 
+    // iterate the set and concatenate the words
+    string finalStr;
     for (auto it : dic)
-    {
-        cout << it << ",";
-    }
-    return 0;
+        finalStr += it;
+
+    // validation of k
+    assert(k >= 0 && k < finalStr.size());
+    return finalStr[k];
 }
 
-#ifdef _TESTING
-int main()
-{
-    string input = "dbac";
-    int k = 3;
-    ashtonString(input, k);
-    return 0;
-}
-#else
 int main()
 {
     ofstream fout(getenv("OUTPUT_PATH"));
@@ -107,4 +102,3 @@ string rtrim(const string &str) {
 
     return s;
 }
-#endif //_TESTING

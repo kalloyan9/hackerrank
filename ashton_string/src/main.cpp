@@ -1,8 +1,10 @@
 #include <bits/stdc++.h>
 #include <string>
 #include <set>
+#include <algorithm>
 
 using namespace std;
+#define _TESTING
 
 string ltrim(const string &);
 string rtrim(const string &);
@@ -15,44 +17,58 @@ string rtrim(const string &);
  *  1. STRING s
  *  2. INTEGER k
  */
-
-char ashtonString(string s, int k) {
-    set<string> dic{};
-    const char *pS = s.c_str(), *pIt = nullptr;
-    // iterate the string by steps ([1...size] words) and put all possibilities to the set.
-    // set is sorted, so the lexicographic order will be guaranteed
-    for (int step = 1; step <= s.size(); ++step)
-    {
-        pS = s.c_str();
-        string subStr{*pS};
-        // iterate string by word
-        for (pS = s.c_str(); *pS != '\0'; ++pS)
-        {
-            subStr = *pS;
-            // check next word
-            if (*(pS + 1) != '\0')
-            {
-                size_t len = 1;
-                // otherwise extract substring
-                for (pIt = pS + 1; *pIt != '\0' && len < step; ++pIt, ++len)
-                {
-                    subStr.push_back(*pIt);
-                }
-            }
-            dic.insert(subStr);
+char ashtonStringBruteForce(const string& s, int k)
+{
+    set<string> dic;
+    
+    // Generate all substrings
+    for (size_t i = 0; i < s.length(); ++i) {
+        for (size_t len = 1; len <= s.length() - i; ++len) {
+            dic.insert(s.substr(i, len));
         }
     }
 
-    // iterate the set and concatenate the words
-    string finalStr;
-    for (auto it : dic)
-        finalStr += it;
+    string finalStr = "";
+    for (const string& sub : dic) {
+        finalStr += sub;
+    }
 
-    // validation of k
-    assert(k >= 0 && k < finalStr.size());
-    return finalStr[k];
+    #ifdef _TESTING
+    cout << finalStr << endl;
+    #endif //_TESTING
+
+    // counting from 1 to N
+    return finalStr[k - 1];
 }
 
+#ifdef _TESTING
+int main()
+{
+    {
+        // test 1
+        string input = "dbac";
+        int k = 3;
+        cout << ashtonStringBruteForce(input, k) << endl;
+        return 0;
+    }
+
+    {
+        // test 2
+        string input = "ab";
+        int k = 2;
+        cout << ashtonStringBruteForce(input, k) << endl;
+    }
+
+    {
+        // test 3
+        string input = "cba";
+        int k = 4;
+        cout << ashtonStringBruteForce(input, k) << endl;
+    }
+
+    return 0;
+}
+#else
 int main()
 {
     ofstream fout(getenv("OUTPUT_PATH"));
@@ -102,3 +118,4 @@ string rtrim(const string &str) {
 
     return s;
 }
+#endif //_TESTING
